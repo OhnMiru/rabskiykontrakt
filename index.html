@@ -1307,7 +1307,7 @@
             showToast(`Продажа на ${total} ₽ завершена!`, true);
         }
         
-        // ========== ФИЛЬТР ТИПОВ (НОВЫЙ СТИЛЬ) ==========
+        // ========== ФИЛЬТР ТИПОВ ==========
         function updateTypeFilterTrigger() {
             const trigger = document.getElementById('typeFilterTrigger');
             if (!trigger) return;
@@ -1336,7 +1336,6 @@
                 `;
             });
             
-            // Кнопки Сбросить и Применить
             html += `
                 <div style="display: flex; gap: 10px; padding: 12px; border-top: 1px solid var(--border-color); margin-top: 4px;">
                     <button id="typeResetBtn" style="flex: 1; background: transparent; border: 1px solid var(--border-color); border-radius: 20px; padding: 8px 0; font-size: 12px; cursor: pointer; color: var(--text-secondary);">Сбросить</button>
@@ -1346,7 +1345,6 @@
             
             dropdown.innerHTML = html;
             
-            // Привязываем события после создания DOM
             const resetBtn = document.getElementById('typeResetBtn');
             const applyBtn = document.getElementById('typeApplyBtn');
             if (resetBtn) {
@@ -1354,7 +1352,7 @@
                     e.stopPropagation();
                     selectedTypes.clear();
                     updateTypeFilterTrigger();
-                    renderTypeMultiSelectList(); // обновляем отображение без закрытия
+                    renderTypeMultiSelectList();
                     filterAndSort();
                 };
             }
@@ -1365,13 +1363,12 @@
                     filterAndSort();
                 };
             }
+        }
         
-        // Функция для обновления списка без перестройки всей структуры
         function renderTypeMultiSelectList() {
             const dropdown = document.getElementById('typeFilterDropdown');
             if (!dropdown) return;
             
-            // Обновляем только элементы списка, сохраняя кнопки
             const itemsContainer = document.createElement('div');
             itemsContainer.innerHTML = '<div class="filter-option-header">Выберите типы мерча</div>';
             
@@ -1384,7 +1381,6 @@
                 itemsContainer.appendChild(div);
             });
             
-            // Сохраняем кнопки
             const buttonsDiv = dropdown.querySelector('div[style*="display: flex; gap: 10px; padding: 12px"]');
             dropdown.innerHTML = '';
             dropdown.appendChild(itemsContainer);
@@ -1478,7 +1474,6 @@
             typeTrigger.onclick = (e) => { 
                 e.stopPropagation(); 
                 typeDropdown.classList.toggle('show');
-                // При открытии обновляем список
                 buildTypeMultiSelect();
             };
             document.addEventListener('click', () => closeTypeDropdown());
