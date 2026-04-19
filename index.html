@@ -543,34 +543,36 @@
             flex-direction: column;
             gap: 12px;
             margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
+            padding: 12px;
+            background: var(--badge-bg);
+            border-radius: 20px;
         }
         .history-filter-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
         }
-        .history-filter-group {
+        .history-filter-block {
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 6px 8px;
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            align-items: center;
-            background: var(--card-bg);
-            padding: 6px 12px;
-            border-radius: 30px;
+            gap: 4px;
             border: 1px solid var(--border-color);
         }
         .history-filter-label {
             font-size: 12px;
             color: var(--text-secondary);
             font-weight: 500;
-            margin-right: 4px;
+            padding: 0 8px;
+            display: flex;
+            align-items: center;
         }
         .history-filter-btn {
             padding: 6px 14px;
-            border-radius: 20px;
+            border-radius: 25px;
             border: none;
             background: transparent;
             cursor: pointer;
@@ -586,8 +588,8 @@
             background: var(--btn-bg);
             color: white;
         }
-        
-        /* Кастомный календарь */
+
+        /* Кастомное поле даты и времени */
         .custom-datetime {
             display: flex;
             align-items: center;
@@ -597,25 +599,30 @@
             border-radius: 30px;
             border: 1px solid var(--border-color);
         }
+        .custom-datetime span {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
         .custom-datetime input {
             background: transparent;
             border: none;
-            padding: 6px 0;
-            font-size: 12px;
+            padding: 8px 0;
+            font-size: 13px;
             color: var(--text-primary);
             outline: none;
-            width: 150px;
+            width: 140px;
+            font-family: monospace;
         }
         .custom-datetime input::-webkit-calendar-picker-indicator {
             filter: var(--calendar-icon-filter, none);
             cursor: pointer;
-            opacity: 0.7;
+            opacity: 0.6;
         }
         .custom-datetime input::-webkit-calendar-picker-indicator:hover {
             opacity: 1;
         }
-        
-        /* Фильтр по сумме (диапазон) */
+
+        /* Фильтр по сумме с шагом 100 */
         .price-range-filter {
             display: flex;
             align-items: center;
@@ -632,15 +639,16 @@
         .price-range-filter input {
             background: transparent;
             border: none;
-            padding: 6px 0;
-            font-size: 12px;
+            padding: 8px 0;
+            font-size: 13px;
             color: var(--text-primary);
             outline: none;
             width: 70px;
             text-align: center;
         }
-        .price-range-filter input::placeholder {
-            color: var(--text-muted);
+        .price-range-filter input::-webkit-inner-spin-button,
+        .price-range-filter input::-webkit-outer-spin-button {
+            opacity: 0.5;
         }
         .price-range-separator {
             color: var(--text-muted);
@@ -969,30 +977,34 @@
             </div>
             <div class="history-filters">
                 <div class="history-filter-row">
-                    <div class="history-filter-group">
-                        <span class="history-filter-label">📋 Тип:</span>
-                        <button class="history-filter-btn" data-filter="all" onclick="setHistoryTypeFilter('all')">Все</button>
-                        <button class="history-filter-btn" data-filter="basket" onclick="setHistoryTypeFilter('basket')">Корзина</button>
-                        <button class="history-filter-btn" data-filter="single" onclick="setHistoryTypeFilter('single')">Поштучно</button>
-                        <button class="history-filter-btn" data-filter="sale" onclick="setHistoryTypeFilter('sale')">Продажи</button>
-                        <button class="history-filter-btn" data-filter="return" onclick="setHistoryTypeFilter('return')">Возвраты</button>
+                    <div class="history-filter-block">
+                        <span class="history-filter-label">📦 Способ:</span>
+                        <button class="history-filter-btn" data-method="all" onclick="setHistoryMethodFilter('all')">Все</button>
+                        <button class="history-filter-btn" data-method="basket" onclick="setHistoryMethodFilter('basket')">Корзина</button>
+                        <button class="history-filter-btn" data-method="single" onclick="setHistoryMethodFilter('single')">Поштучно</button>
+                    </div>
+                    <div class="history-filter-block">
+                        <span class="history-filter-label">🔄 Тип:</span>
+                        <button class="history-filter-btn" data-type="all" onclick="setHistoryTypeFilter('all')">Все</button>
+                        <button class="history-filter-btn" data-type="sale" onclick="setHistoryTypeFilter('sale')">Продажи</button>
+                        <button class="history-filter-btn" data-type="return" onclick="setHistoryTypeFilter('return')">Возвраты</button>
                     </div>
                 </div>
                 <div class="history-filter-row">
                     <div class="custom-datetime">
-                        <span class="history-filter-label">📅 с</span>
-                        <input type="datetime-local" id="historyDateTimeFrom" step="1">
+                        <span>📅 с</span>
+                        <input type="datetime-local" id="historyDateTimeFrom" step="60">
                     </div>
                     <div class="custom-datetime">
-                        <span class="history-filter-label">по</span>
-                        <input type="datetime-local" id="historyDateTimeTo" step="1">
+                        <span>по</span>
+                        <input type="datetime-local" id="historyDateTimeTo" step="60">
                     </div>
                     <div class="price-range-filter">
                         <span>💰 от</span>
-                        <input type="number" id="historyMinPrice" placeholder="0" value="0">
+                        <input type="number" id="historyMinPrice" placeholder="0" value="0" step="100">
                         <span class="price-range-separator">—</span>
                         <span>до</span>
-                        <input type="number" id="historyMaxPrice" placeholder="∞">
+                        <input type="number" id="historyMaxPrice" placeholder="∞" step="100">
                     </div>
                 </div>
             </div>
@@ -1032,8 +1044,9 @@
         
         // ========== ИСТОРИЯ ==========
         let salesHistory = [];
-        let historyTypeFilter = "all";
-        
+        let historyMethodFilter = "all"; // all, basket, single
+        let historyTypeFilter = "all";   // all, sale, return
+
         function loadHistory() {
             const saved = localStorage.getItem('merch_sales_history');
             if (saved) {
@@ -1042,33 +1055,33 @@
                 salesHistory = [];
             }
         }
-        
+
         function saveHistory() {
             localStorage.setItem('merch_sales_history', JSON.stringify(salesHistory));
         }
-        
-        function addToHistory(items, total, type, isReturn = false) {
+
+        function addToHistory(items, total, method, isReturn = false) {
             const entry = {
                 date: new Date().toISOString(),
                 items: items.map(item => ({ name: item.name, qty: item.qty, price: item.price })),
                 total: total,
-                type: type,
+                method: method, // 'basket' или 'single'
                 isReturn: isReturn
             };
             salesHistory.unshift(entry);
             if (salesHistory.length > 200) salesHistory = salesHistory.slice(0, 200);
             saveHistory();
         }
-        
+
         function addSingleSaleToHistory(name, qty, price, isReturn = false) {
             const total = qty * price;
             addToHistory([{ name: name, qty: qty, price: price }], total, 'single', isReturn);
         }
-        
-        function setHistoryTypeFilter(filter) {
-            historyTypeFilter = filter;
-            document.querySelectorAll('.history-filter-btn').forEach(btn => {
-                if (btn.dataset.filter === filter) {
+
+        function setHistoryMethodFilter(filter) {
+            historyMethodFilter = filter;
+            document.querySelectorAll('[data-method]').forEach(btn => {
+                if (btn.dataset.method === filter) {
                     btn.classList.add('active');
                 } else {
                     btn.classList.remove('active');
@@ -1076,29 +1089,44 @@
             });
             renderHistoryList();
         }
-        
+
+        function setHistoryTypeFilter(filter) {
+            historyTypeFilter = filter;
+            document.querySelectorAll('[data-type]').forEach(btn => {
+                if (btn.dataset.type === filter) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            renderHistoryList();
+        }
+
         function renderHistoryList() {
             const container = document.getElementById('history-list');
             if (!container) return;
-            
+    
             const dateTimeFrom = document.getElementById('historyDateTimeFrom')?.value;
             const dateTimeTo = document.getElementById('historyDateTimeTo')?.value;
             const minPrice = parseInt(document.getElementById('historyMinPrice')?.value) || 0;
             const maxPrice = parseInt(document.getElementById('historyMaxPrice')?.value) || Infinity;
-            
+    
             let filtered = [...salesHistory];
-            
-            // Фильтр по типу операции
-            if (historyTypeFilter === 'basket') {
-                filtered = filtered.filter(e => e.type === 'basket');
-            } else if (historyTypeFilter === 'single') {
-                filtered = filtered.filter(e => e.type === 'single');
-            } else if (historyTypeFilter === 'sale') {
+    
+            // Фильтр по способу (корзина/поштучно)
+            if (historyMethodFilter === 'basket') {
+                filtered = filtered.filter(e => e.method === 'basket');
+            } else if (historyMethodFilter === 'single') {
+                filtered = filtered.filter(e => e.method === 'single');
+            }
+    
+            // Фильтр по типу (продажа/возврат)
+            if (historyTypeFilter === 'sale') {
                 filtered = filtered.filter(e => !e.isReturn);
             } else if (historyTypeFilter === 'return') {
                 filtered = filtered.filter(e => e.isReturn === true);
             }
-            
+    
             // Фильтр по дате и времени
             if (dateTimeFrom) {
                 const fromDate = new Date(dateTimeFrom);
@@ -1108,33 +1136,33 @@
                 const toDate = new Date(dateTimeTo);
                 filtered = filtered.filter(e => new Date(e.date) <= toDate);
             }
-            
+    
             // Фильтр по диапазону цен
             filtered = filtered.filter(e => e.total >= minPrice && e.total <= maxPrice);
-            
+    
             if (filtered.length === 0) {
                 container.innerHTML = '<div class="empty-cart">🍌 История пуста</div>';
                 return;
             }
-            
+    
             let html = '';
             for (const entry of filtered) {
                 const date = new Date(entry.date);
-                const dateStr = date.toLocaleString('ru-RU');
-                const isBasket = entry.type === 'basket';
+                const dateStr = date.toLocaleString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+                const isBasket = entry.method === 'basket';
                 const isReturn = entry.isReturn;
-                
+        
                 let itemsHtml = '';
                 for (const item of entry.items) {
                     itemsHtml += `<div>• ${item.name}: ${item.qty} шт × ${item.price} ₽ = ${item.qty * item.price} ₽</div>`;
                 }
-                
-                const typeLabel = isBasket ? 'Корзина' : 'Поштучно';
+        
+                const methodLabel = isBasket ? 'Корзина' : 'Поштучно';
                 const actionLabel = isReturn ? 'Возврат' : 'Продажа';
-                
+        
                 html += `
                     <div class="history-item">
-                        <div class="history-date">${dateStr} <span class="history-badge">${typeLabel}</span> <span class="history-badge" style="background:${isReturn ? 'var(--minus-bg)' : 'var(--badge-bg)'}">${actionLabel}</span></div>
+                        <div class="history-date">${dateStr} <span class="history-badge">${methodLabel}</span> <span class="history-badge" style="background:${isReturn ? 'var(--minus-bg)' : 'var(--badge-bg)'}">${actionLabel}</span></div>
                         <div class="history-details">${itemsHtml}</div>
                         <div class="${isReturn ? 'history-return' : 'history-sale'}">${isReturn ? '↩️' : '💰'} Итого: ${entry.total} ₽</div>
                     </div>
