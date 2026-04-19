@@ -25,9 +25,9 @@
             --revenue-color: #d35400;
             --minus-bg: #ffe6e5;
             --minus-color: #e67e22;
-            --plus-bg: #e8f5e8;
-            --plus-color: #2e7d32;
-            --add-to-cart-bg: #4caf50;
+            --plus-bg: #fff0d0;
+            --plus-color: #e67e22;
+            --add-to-cart-bg: #f39c12;
             --add-to-cart-color: white;
             --btn-bg: #f39c12;
             --footer-bg: white;
@@ -63,9 +63,9 @@
             --revenue-color: #e67e22;
             --minus-bg: #3a2018;
             --minus-color: #e67e22;
-            --plus-bg: #1e3a1e;
-            --plus-color: #4caf50;
-            --add-to-cart-bg: #2e7d32;
+            --plus-bg: #3a2a10;
+            --plus-color: #f39c12;
+            --add-to-cart-bg: #e67e22;
             --add-to-cart-color: #ffffff;
             --btn-bg: #e67e22;
             --footer-bg: #1e1708;
@@ -91,10 +91,48 @@
             background: var(--bg-color);
             margin: 0;
             padding: 12px;
-            padding-top: 60px;
             padding-bottom: 70px;
             transition: background 0.3s ease, color 0.2s ease;
         }
+        
+        /* Шапка с кнопкой темы на одном уровне */
+        .header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+        .title-area {
+            flex: 1;
+        }
+        h1 {
+            font-size: 22px;
+            margin: 0;
+            color: var(--badge-text);
+        }
+        .sub {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+        
+        /* Кнопка смены темы — на одном уровне с заголовком */
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .theme-toggle:active { transform: scale(0.95); }
         
         /* Toast уведомление */
         .toast-notification {
@@ -161,35 +199,6 @@
             text-align: center;
         }
         
-        /* Кнопка смены темы — закреплена справа сверху */
-        .theme-toggle {
-            position: fixed;
-            top: 12px;
-            right: 12px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 30px;
-            width: 40px;
-            height: 40px;
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1500;
-            box-shadow: 0 2px 8px var(--shadow);
-            transition: all 0.2s ease;
-        }
-        .theme-toggle:active { transform: scale(0.95); }
-        
-        /* Шапка с отступом для кнопки темы */
-        .header-area {
-            margin-right: 50px;
-        }
-        
-        h1 { font-size: 22px; margin: 0 0 4px 0; color: var(--badge-text); }
-        .sub { color: var(--text-secondary); margin-bottom: 16px; font-size: 13px; }
-        
         .progress-container { width: 100%; background: var(--progress-bg); border-radius: 20px; margin-bottom: 12px; overflow: hidden; display: none; }
         .progress-bar { width: 0%; height: 4px; background: var(--progress-bar); border-radius: 20px; transition: width 0.2s ease; }
         .progress-container.active { display: block !important; }
@@ -251,13 +260,12 @@
             position: relative;
             transition: all 0.2s ease;
         }
-        /* Блеклая карточка для товаров с остатком 0 */
         .card.out-of-stock {
             opacity: 0.7;
             background: var(--out-of-stock-bg);
         }
         
-        /* Бейдж с количеством в корзине на карточке товара */
+        /* Бейдж с количеством в корзине */
         .cart-qty-badge {
             position: absolute;
             top: 8px;
@@ -299,13 +307,15 @@
         .add-to-cart {
             background: var(--add-to-cart-bg);
             color: var(--add-to-cart-color);
-            width: auto;
-            height: auto;
-            padding: 6px 12px;
-            font-size: 12px;
-            border-radius: 20px;
+            width: 48px;
+            height: 48px;
+            font-size: 20px;
+            border-radius: 50%;
             margin-left: 8px;
             box-shadow: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .refresh-btn, .history-btn {
@@ -381,7 +391,6 @@
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 20px;
-            margin-bottom: 12px;
             max-height: 200px;
             overflow-y: auto;
         }
@@ -413,8 +422,9 @@
         .selected-count {
             font-size: 12px;
             color: var(--text-secondary);
-            margin-bottom: 8px;
+            margin-top: 8px;
             padding: 0 4px;
+            line-height: 1.4;
         }
         
         .rule-styled-input {
@@ -490,12 +500,11 @@
         }   
         @media (max-width: 500px) {
             button { width: 48px; height: 48px; font-size: 22px; }
-            .add-to-cart { width: auto; height: auto; padding: 5px 10px; font-size: 11px; }
+            .add-to-cart { width: 42px; height: 42px; font-size: 18px; }
             .name { font-size: 18px; }
             .stock { font-size: 18px; }
             .type-badge { font-size: 10px; padding: 1px 6px; }
             .custom-select-trigger { padding: 8px 24px 8px 10px; font-size: 12px; }
-            .theme-toggle { top: 8px; right: 8px; width: 36px; height: 36px; font-size: 18px; }
             .filter-option label { font-size: 12px; }
             .cart-fab { bottom: 70px; right: 12px; width: 50px; height: 50px; font-size: 22px; }
             .info { padding-right: 40px; }
@@ -504,8 +513,6 @@
     </style>
 </head>
 <body>
-    <button class="theme-toggle" id="themeToggle" title="Сменить тему">🌙</button>
-    
     <button class="cart-fab" id="cartFab" onclick="openCartModal()">
         🛒
         <span class="cart-badge" id="cartCount">0</span>
@@ -524,10 +531,13 @@
     </div>
 
     <div id="mainContent" style="display:none;">
-        <div class="header-area">
-            <h1>Учёт бананчиков 🍌</h1>
-            <div class="sub">Всё на благо ясгу фд! Всё на благо ясгу фд!</div>
+        <div class="header-row">
+            <div class="title-area">
+                <h1>Учёт бананчиков 🍌</h1>
+            </div>
+            <button class="theme-toggle" id="themeToggle" title="Сменить тему">🌙</button>
         </div>
+        <div class="sub">Всё на благо ясгу фд! Всё на благо ясгу фд!</div>
         
         <div style="display: flex; gap: 10px; margin-bottom: 12px;">
             <button class="refresh-btn" onclick="loadData(true, true)">🔄 Обновить</button>
@@ -644,6 +654,7 @@
         let rulesList = [];
         let currentRuleType = "type";
         let selectedProducts = new Set();
+        let scrollPosition = 0;
         
         function loadRules() {
             const saved = localStorage.getItem('merch_rules_structured');
@@ -699,7 +710,7 @@
                 selectedProducts.add(productName);
             }
             updateSelectedProductsDisplay();
-            renderProductMultiSelect();
+            renderProductMultiSelect(true);
         }
         
         function updateSelectedProductsDisplay() {
@@ -707,16 +718,23 @@
             if (!container) return;
             const count = selectedProducts.size;
             if (count === 0) {
-                container.innerHTML = '<div class="selected-count">📦 Выбрано: 0 товаров</div>';
+                container.innerHTML = '<div class="selected-count">📦 Выбрано товаров: 0</div>';
             } else {
                 const names = Array.from(selectedProducts).join(', ');
-                container.innerHTML = `<div class="selected-count">📦 Выбрано: ${count} товаров (${names.length > 30 ? names.substring(0, 30) + '...' : names})</div>`;
+                container.innerHTML = `<div class="selected-count">📦 Выбрано товаров: ${count}<br>${names}</div>`;
             }
         }
         
-        function renderProductMultiSelect() {
+        function renderProductMultiSelect(preserveScroll = false) {
             const container = document.getElementById('productMultiSelectContainer');
             if (!container) return;
+            
+            if (preserveScroll) {
+                const scrollContainer = container.querySelector('.multi-select-container');
+                if (scrollContainer) {
+                    scrollPosition = scrollContainer.scrollTop;
+                }
+            }
             
             const products = originalCardsData.map(c => ({ name: c.name }));
             let html = '<div class="multi-select-container">';
@@ -731,16 +749,15 @@
             });
             html += '</div><div id="selectedProductsDisplay"></div>';
             container.innerHTML = html;
-            updateSelectedProductsDisplay();
-        }
-        
-        function changePriceValue(delta) {
-            const input = document.getElementById('rulePriceMin');
-            if (input) {
-                let val = parseInt(input.value) || 0;
-                val = Math.max(1, val + delta);
-                input.value = val;
+            
+            if (preserveScroll) {
+                const scrollContainer = container.querySelector('.multi-select-container');
+                if (scrollContainer) {
+                    scrollContainer.scrollTop = scrollPosition;
+                }
             }
+            
+            updateSelectedProductsDisplay();
         }
         
         function renderRuleForm() {
@@ -766,14 +783,10 @@
                     <input type="number" id="ruleProductQty" class="rule-styled-input" placeholder="Количество от (шт)" min="1" step="1">
                     <input type="text" id="ruleProductMessage" class="rule-styled-input" placeholder="Что выводить? (например: Наклейка на лист интерактива)">
                 `;
-                renderProductMultiSelect();
+                renderProductMultiSelect(false);
             } else if (currentRuleType === 'price') {
                 container.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                        <input type="number" id="rulePriceMin" class="rule-styled-input" placeholder="Минимальная сумма (₽)" min="1" step="100" value="1000" style="flex: 1; margin-bottom: 0;">
-                        <button type="button" class="price-step-btn" style="width: 44px; height: 44px; border-radius: 22px; background: var(--badge-bg); border: 1px solid var(--border-color); font-size: 20px; font-weight: bold; cursor: pointer; color: var(--text-primary);" onclick="changePriceValue(-100)">−100</button>
-                        <button type="button" class="price-step-btn" style="width: 44px; height: 44px; border-radius: 22px; background: var(--badge-bg); border: 1px solid var(--border-color); font-size: 20px; font-weight: bold; cursor: pointer; color: var(--text-primary);" onclick="changePriceValue(100)">+100</button>
-                    </div>
+                    <input type="number" id="rulePriceMin" class="rule-styled-input" placeholder="Минимальная сумма (₽)" min="1" step="100" value="1000">
                     <input type="text" id="rulePriceMessage" class="rule-styled-input" placeholder="Что выводить? (например: Печать в бланк)">
                 `;
                 const priceInput = document.getElementById('rulePriceMin');
@@ -817,7 +830,6 @@
                 saveRules();
                 renderRulesList();
                 showToast("Правило добавлено ✅", true);
-                // Очищаем форму
                 if (currentRuleType === 'type') {
                     if(document.getElementById('ruleTypeQty')) document.getElementById('ruleTypeQty').value = '';
                     if(document.getElementById('ruleTypeMessage')) document.getElementById('ruleTypeMessage').value = '';
@@ -829,7 +841,7 @@
                     if(document.getElementById('ruleProductQty')) document.getElementById('ruleProductQty').value = '';
                     if(document.getElementById('ruleProductMessage')) document.getElementById('ruleProductMessage').value = '';
                     selectedProducts.clear();
-                    renderProductMultiSelect();
+                    renderProductMultiSelect(false);
                 } else if (currentRuleType === 'price') {
                     if(document.getElementById('rulePriceMin')) document.getElementById('rulePriceMin').value = '1000';
                     if(document.getElementById('rulePriceMessage')) document.getElementById('rulePriceMessage').value = '';
@@ -979,18 +991,16 @@
             }, 2000);
         }
         
-        // Обновление бейджей на карточках товаров
         function updateCartBadges() {
             document.querySelectorAll('.card').forEach(card => {
                 const minusBtn = card.querySelector('.minus');
                 if (minusBtn) {
                     const idx = parseInt(minusBtn.dataset.index);
-                    const qtyInCart = cart[idx] !== undefined ? cart[idx] : undefined;
                     
                     let badge = card.querySelector('.cart-qty-badge');
                     
-                    // Если товар есть в корзине (даже с нулём) - показываем бейдж
                     if (cart.hasOwnProperty(idx)) {
+                        const qtyInCart = cart[idx];
                         if (!badge) {
                             badge = document.createElement('div');
                             badge.className = 'cart-qty-badge';
@@ -1006,7 +1016,6 @@
                             badge.style.background = 'var(--btn-bg)';
                         }
                     } else {
-                        // Товар никогда не добавляли - удаляем бейдж
                         if (badge) badge.remove();
                     }
                 }
