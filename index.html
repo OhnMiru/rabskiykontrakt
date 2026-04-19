@@ -921,6 +921,180 @@
             }, 2000);
         }
         
+        // ========== ПРАВИЛА ==========
+        let rulesList = [];
+
+        // Загрузка правил из localStorage
+        function loadRules() {
+            const saved = localStorage.getItem('merch_rules');
+            if (saved) {
+                rulesList = JSON.parse(saved);
+            } else {
+                // Правила по умолчанию
+                rulesList = [
+                    { text: "🎁 При покупке открытки → стикер в подарок", type: "gift" },
+                    { text: "📜 При покупке от 1000 ₽ → печать в бланк", type: "stamp" },
+                ];
+                saveRules();
+            }
+        }
+
+        function saveRules() {
+            localStorage.setItem('merch_rules', JSON.stringify(rulesList));
+        }
+    
+        function renderRulesModal() {
+            const container = document.getElementById('rules-list');
+            if (!container) return;
+    
+            if (rulesList.length === 0) {
+                container.innerHTML = '<div class="empty-cart">📭 Нет добавленных правил. Напишите своё!</div>';
+                return;
+            }
+    
+            let html = '';
+            rulesList.forEach((rule, index) => {
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border-color);">
+                        <span style="flex: 1; color: var(--text-primary); font-size: 14px;">${escapeHtml(rule.text)}</span>
+                        <button onclick="deleteRule(${index})" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--minus-color); width: 36px; height: 36px; box-shadow: none;">🗑</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function openRulesModal() {
+            renderRulesModal();
+            const modal = document.getElementById('rulesModal');
+            if (modal) modal.style.display = 'block';
+        }
+
+        function closeRulesModal() {
+            const modal = document.getElementById('rulesModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function addCustomRule() {
+            const input = document.getElementById('newRuleInput');
+            const text = input.value.trim();
+            if (!text) {
+                showToast("Введите правило", false);
+                return;
+            }
+            rulesList.push({ text: text, type: "custom" });
+            saveRules();
+            renderRulesModal();
+            input.value = '';
+            showToast("Правило добавлено ✅", true);
+        }
+
+        function deleteRule(index) {
+            rulesList.splice(index, 1);
+            saveRules();
+            renderRulesModal();
+            showToast("Правило удалено", true);
+        }
+
+        function resetDefaultRules() {
+            rulesList = [
+                { text: "🎁 При покупке открытки → стикер в подарок", type: "gift" },
+                { text: "📜 При покупке от 1000 ₽ → печать в бланк", type: "stamp" },
+            ];
+            saveRules();
+            renderRulesModal();
+            showToast("Правила сброшены к стандартным ✅", true);
+        }
+
+        // ========== ПРОВЕРКА ПРАВИЛ ДЛЯ КОРЗИНЫ ==========
+        function checkRulesForCart() {
+            const cartItems = Object.entries(cart);
+            if (cartItems.length === 0) return [];
+            
+            // Собираем информацию о товарах в корзине
+            const cartInfo = {};
+            let totalPrice = 0;
+            
+            for (const [idxStr, qty] of cartItems) {
+                const idx = parseInt(idxStr);
+                const card = originalCardsData[idx];
+                if (card) {
+                    cartInfo[card.name] = { qty, price: card.price, idx };
+                    totalPrice += qty * card.price;
+                }
+            }
+            
+            const activeRules = [];
+            
+            // Правило 1: открытки → стикер (если 2 и более открыток)
+            const opencardQty = cartInfo["Открытка"]?.qty || 0;
+            if (opencardQty >= 2) {
+                activeRules.push({
+                    icon: "🎁",
+                    text: `Стикер в подарок! (в корзине ${opencardQty} открыток, нужно от 2)`,
+                    type: "gift"
+                });
+            }
+            
+            // Правило 2: покупка от 1000 ₽ → печать в бланк
+            if (totalPrice >= 1000) {
+                activeRules.push({
+                    icon: "📜",
+                    text: `Печать в бланк! (сумма ${totalPrice} ₽, от 1000 ₽)`,
+                    type: "stamp"
+                });
+            }
+            
+            // Динамические правила из списка (пользовательские)
+            for (const rule of rulesList) {
+                const text = rule.text;
+                
+                // Проверка на "от X ₽"
+                const priceMatch = text.match(/от\s*(\d+)\s*₽/i);
+                if (priceMatch) {
+                    const threshold = parseInt(priceMatch[1]);
+                    if (totalPrice >= threshold && !activeRules.some(r => r.text.includes(`от ${threshold} ₽`))) {
+                        const giftMatch = text.match(/→\s*(.+)$/);
+                        const giftText = giftMatch ? giftMatch[1] : "подарок";
+                        activeRules.push({
+                            icon: "🎁",
+                            text: `${giftText} (сумма ${totalPrice} ₽, от ${threshold} ₽)`,
+                            type: "price_rule"
+                        });
+                    }
+                    continue;
+                }
+                
+                // Проверка на "при покупке N [товар]"
+                const purchaseMatch = text.match(/при покупке\s*(\d+)\s*([^→]+)→\s*(.+)$/i);
+                if (purchaseMatch) {
+                    const needQty = parseInt(purchaseMatch[1]);
+                    const productName = purchaseMatch[2].trim();
+                    const gift = purchaseMatch[3].trim();
+                    
+                    // Ищем похожий товар в корзине
+                    let foundQty = 0;
+                    for (const [name, info] of Object.entries(cartInfo)) {
+                        if (name.toLowerCase().includes(productName.toLowerCase()) || 
+                            productName.toLowerCase().includes(name.toLowerCase())) {
+                            foundQty = info.qty;
+                            break;
+                        }
+                    }
+                    
+                    if (foundQty >= needQty) {
+                        activeRules.push({
+                            icon: "🎁",
+                            text: `${gift} (в корзине ${foundQty} шт "${productName}", нужно от ${needQty})`,
+                            type: "product_rule"
+                        });
+                    }
+                }
+            }
+            
+            return activeRules;
+        }
+        
         function updateCartUI() {
             const count = Object.values(cart).reduce((a, b) => a + b, 0);
             const cartCountSpan = document.getElementById('cartCount');
@@ -939,8 +1113,24 @@
                 return;
             }
             
+            // Проверяем активные правила
+            const activeRules = checkRulesForCart();
+            
             let total = 0;
             let html = '';
+            
+            // Добавляем блок с активными правилами (если есть)
+            if (activeRules.length > 0) {
+                html += `<div style="background: var(--badge-bg); border-radius: 16px; padding: 12px; margin-bottom: 16px; border-left: 4px solid var(--btn-bg);">
+                    <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: var(--badge-text);">✨ Активные правила ✨</div>`;
+                for (const rule of activeRules) {
+                    html += `<div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-primary); padding: 4px 0;">
+                        <span style="font-size: 16px;">${rule.icon}</span>
+                        <span>${escapeHtml(rule.text)}</span>
+                    </div>`;
+                }
+                html += `</div>`;
+            }
             
             for (const [idxStr, qty] of Object.entries(cart)) {
                 const idx = parseInt(idxStr);
@@ -1044,6 +1234,16 @@
                 const idx = parseInt(idxStr);
                 return sum + qty * originalCardsData[idx].price;
             }, 0);
+            
+            // Показываем напоминание о правилах
+            const activeRules = checkRulesForCart();
+            if (activeRules.length > 0) {
+                let rulesMessage = "Не забудьте:\n";
+                for (const rule of activeRules) {
+                    rulesMessage += `• ${rule.text}\n`;
+                }
+                showToast(rulesMessage, true);
+            }
     
             // Сохраняем копию корзины
             const cartCopy = { ...cart };
@@ -1063,14 +1263,12 @@
                 // Находим карточку в DOM и обновляем только её
                 const cards = document.querySelectorAll('.card');
                 let targetCard = null;
-                let targetIndex = -1;
         
                 // Ищем карточку по индексу
                 for (let i = 0; i < cards.length; i++) {
                     const minusBtn = cards[i].querySelector('.minus');
                     if (minusBtn && parseInt(minusBtn.dataset.index) === idx) {
                         targetCard = cards[i];
-                        targetIndex = i;
                         break;
                     }
                 }
@@ -1102,7 +1300,7 @@
                 showUpdateTime();
             })();
     
-            showToast(` Продажа на ${total} ₽ завершена!`, true);
+            showToast(`Продажа на ${total} ₽ завершена!`, true);
         }
         
         // ========== ОСТАЛЬНОЙ КОД ==========
@@ -1562,12 +1760,16 @@
         
         function closeHistory() { const modal = document.getElementById('historyModal'); if (modal) modal.style.display = 'none'; }
         function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, function(m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
+        
         window.onclick = function(event) { 
             const modal = document.getElementById('historyModal'); 
             if (event.target === modal) closeHistory();
             const cartModal = document.getElementById('cartModal');
             if (event.target === cartModal) closeCartModal();
+            const rulesModal = document.getElementById('rulesModal');
+            if (event.target === rulesModal) closeRulesModal();
         }
+        
         function startAutoRefresh() { if (autoRefreshInterval) clearInterval(autoRefreshInterval); autoRefreshInterval = setInterval(() => { loadData(false, true); }, 60000); }
         
         function resetAllFilters() {
@@ -1611,101 +1813,6 @@
             } else { loginOverlay.style.display = 'flex'; mainContent.style.display = 'none'; document.getElementById('passwordInput').focus(); }
         }
 
-// ========== ПРАВИЛА ==========
-        let rulesList = [];
-
-        // Загрузка правил из localStorage
-        function loadRules() {
-            const saved = localStorage.getItem('merch_rules');
-            if (saved) {
-                rulesList = JSON.parse(saved);
-            } else {
-                // Правила по умолчанию
-                rulesList = [
-                    { text: "🎁 При покупке открытки → стикер в подарок", type: "gift" },
-                    { text: "📜 При покупке от 1000 ₽ → печать в бланк", type: "stamp" },
-                ];
-                saveRules();
-            }
-        }
-
-        function saveRules() {
-            localStorage.setItem('merch_rules', JSON.stringify(rulesList));
-        }
-    
-        function renderRulesModal() {
-            const container = document.getElementById('rules-list');
-            if (!container) return;
-    
-            if (rulesList.length === 0) {
-                container.innerHTML = '<div class="empty-cart">📭 Нет добавленных правил. Напишите своё!</div>';
-                return;
-            }
-    
-            let html = '';
-            rulesList.forEach((rule, index) => {
-                html += `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border-color);">
-                        <span style="flex: 1; color: var(--text-primary); font-size: 14px;">${escapeHtml(rule.text)}</span>
-                        <button onclick="deleteRule(${index})" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--minus-color); width: 36px; height: 36px; box-shadow: none;">🗑</button>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        function openRulesModal() {
-            renderRulesModal();
-            const modal = document.getElementById('rulesModal');
-            if (modal) modal.style.display = 'block';
-        }
-
-        function closeRulesModal() {
-            const modal = document.getElementById('rulesModal');
-            if (modal) modal.style.display = 'none';
-        }
-
-        function addCustomRule() {
-            const input = document.getElementById('newRuleInput');
-            const text = input.value.trim();
-            if (!text) {
-                showToast("Введите правило", false);
-                return;
-            }
-            rulesList.push({ text: text, type: "custom" });
-            saveRules();
-            renderRulesModal();
-            input.value = '';
-            showToast("Правило добавлено ✅", true);
-        }
-
-        function deleteRule(index) {
-            rulesList.splice(index, 1);
-            saveRules();
-            renderRulesModal();
-            showToast("Правило удалено", true);
-        }
-
-        function resetDefaultRules() {
-            rulesList = [
-        { text: "🎁 При покупке открытки → стикер в подарок", type: "gift" },
-        { text: "📜 При покупке от 1000 ₽ → печать в бланк", type: "stamp" },
-            ];
-            saveRules();
-            renderRulesModal();
-            showToast("Правила сброшены к стандартным ✅", true);
-        }
-
-        // Добавляем обработчик закрытия для модалки правил
-        window.onclick = function(event) { 
-            const modal = document.getElementById('historyModal'); 
-            if (event.target === modal) closeHistory();
-            const cartModal = document.getElementById('cartModal');
-            if (event.target === cartModal) closeCartModal();
-            const rulesModal = document.getElementById('rulesModal');
-            if (event.target === rulesModal) closeRulesModal();
-        }
-        
         // Загружаем правила при старте
         loadRules();
         
