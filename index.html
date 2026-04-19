@@ -482,7 +482,6 @@
             font-size: 18px; 
             font-weight: bold; 
             color: var(--badge-text);
-            padding-right: 40px;
         }
         .modal-close-btn {
             position: absolute;
@@ -507,6 +506,30 @@
         .history-item { 
             border-bottom: 1px solid var(--border-color); 
             padding: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .history-content {
+            flex: 1;
+        }
+        .history-delete-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--minus-color);
+            width: 36px;
+            height: 36px;
+            box-shadow: none;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .history-delete-btn:hover {
+            background: var(--badge-bg);
         }
         .history-date { 
             font-size: 11px; 
@@ -536,6 +559,21 @@
             font-size: 11px;
             margin-left: 8px;
         }
+        .history-clear-btn {
+            background: var(--minus-bg);
+            color: var(--minus-color);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-left: auto;
+        }
+        .history-header-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
         
         /* ========== ФИЛЬТРЫ ИСТОРИИ ========== */
         .history-filters {
@@ -553,7 +591,6 @@
             gap: 10px;
             align-items: center;
         }
-
         .history-filter-btn {
             border-radius: 30px;
             border: 1px solid var(--border-color);
@@ -564,24 +601,17 @@
             color: var(--text-primary);
             transition: all 0.2s;
             white-space: nowrap;
-            padding-left: 12px;
-            margin: 0;
-            height: 30px;
-            line-height: 30px;
-            width: 118px;
-            line-width: 118px;
+            padding: 6px 16px;
+            height: 34px;
             display: inline-flex;
-            text-align: center;
-            font-family: inherit;
-            box-sizing: border-box;
+            align-items: center;
+            justify-content: center;
         }
         .history-filter-btn-small {
-            min-width: 52ptx;
-            wight: auto;
+            padding: 6px 14px;
         }
         .history-filter-btn-large {
-            min-width: 100ptx;
-            wight: auto;
+            padding: 6px 22px;
         }
         .history-filter-btn:hover {
             background: var(--badge-bg);
@@ -590,6 +620,14 @@
             background: var(--btn-bg);
             color: white;
             border-color: var(--btn-bg);
+        }
+        .history-filter-reset {
+            background: var(--reset-bg);
+            color: var(--reset-color);
+            border: 1px solid var(--border-color);
+        }
+        .history-filter-reset:hover {
+            background: var(--badge-bg);
         }
 
         /* Поля даты */
@@ -603,6 +641,7 @@
             outline: none;
             cursor: pointer;
             width: 170px;
+            height: 34px;
         }
         .history-date-input::-webkit-calendar-picker-indicator {
             filter: var(--calendar-icon-filter, none);
@@ -619,6 +658,7 @@
             padding: 4px 12px;
             border-radius: 30px;
             border: 1px solid var(--border-color);
+            height: 34px;
         }
         .history-price-filter span {
             font-size: 13px;
@@ -634,6 +674,7 @@
             width: 75px;
             text-align: center;
             outline: none;
+            height: 26px;
         }
         .history-price-filter input::-webkit-inner-spin-button,
         .history-price-filter input::-webkit-outer-spin-button {
@@ -839,11 +880,11 @@
             .price-step-btn { width: 38px; height: 38px; font-size: 16px; }
             .modal-content { width: calc(100% - 30px); margin: 15px auto; }
             .modal-close-btn { top: 10px; right: 12px; width: 32px; height: 32px; font-size: 18px; }
-            .date-input { width: 130px; font-size: 12px; padding: 5px 10px; }
-            .filter-btn { padding: 5px 12px; font-size: 12px; }
-            .filter-btn-all { padding: 5px 10px; }
-            .filter-btn-wide { padding: 5px 16px; }
-            .price-filter input { width: 55px; }
+            .history-date-input { width: 130px; font-size: 12px; padding: 5px 10px; }
+            .history-filter-btn { padding: 5px 12px; font-size: 12px; }
+            .history-filter-btn-small { padding: 5px 10px; }
+            .history-filter-btn-large { padding: 5px 16px; }
+            .history-price-filter input { width: 55px; }
         }
     </style>
 </head>
@@ -960,37 +1001,37 @@
         </div>
     </div>
     
-            <!-- Модалка истории -->
-            <div id="historyModal" class="modal">
-                <div class="modal-content" style="max-width: 550px;">
-                    <button class="modal-close-btn" onclick="closeHistory()">×</button>
-                    <div class="modal-header">
-                        <span>📜 История операций</span>
-                    </div>
-                    <div class="history-filters">
-                        <div class="history-filter-row">
-                            <button class="history-filter-btn history-filter-btn-small" data-method="all" onclick="setHistoryMethodFilter('all')">Все способы</button>
-                            <button class="history-filter-btn history-filter-btn-large" data-method="basket" onclick="setHistoryMethodFilter('basket')">Корзина</button>
-                            <button class="history-filter-btn history-filter-btn-large" data-method="single" onclick="setHistoryMethodFilter('single')">Поштучно</button>
-                
-                            <button class="history-filter-btn history-filter-btn-small" data-type="all" onclick="setHistoryTypeFilter('all')">Все типы</button>
-                            <button class="history-filter-btn history-filter-btn-large" data-type="sale" onclick="setHistoryTypeFilter('sale')">Продажи</button>
-                            <button class="history-filter-btn history-filter-btn-large" data-type="return" onclick="setHistoryTypeFilter('return')">Возвраты</button>
-                        </div>
-                        <div class="history-filter-row">
-                            <input type="datetime-local" id="historyDateTimeFrom" class="history-date-input" step="60">
-                            <span class="history-price-separator">—</span>
-                            <input type="datetime-local" id="historyDateTimeTo" class="history-date-input" step="60">
-                            <div class="history-price-filter">
-                                <span>💰</span>
-                                <input type="number" id="historyMinPrice" placeholder="0" value="0" step="100">
-                                <span class="history-price-separator">—</span>
-                                <input type="number" id="historyMaxPrice" placeholder="∞" step="100">
-                            </div>
-                        </div>
-                    </div>
-                    <div id="history-list">
-                        <div class="loading">Загрузка истории...</div>
+    <!-- Модалка истории -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content" style="max-width: 550px;">
+            <button class="modal-close-btn" onclick="closeHistory()">×</button>
+            <div class="modal-header">
+                <span>📜 История операций</span>
+                <div class="history-header-buttons">
+                    <button class="history-clear-btn" onclick="clearAllHistory()">🗑 Очистить всё</button>
+                </div>
+            </div>
+            <div class="history-filters">
+                <div class="history-filter-row">
+                    <button class="history-filter-btn history-filter-btn-small" data-method="all" onclick="setHistoryMethodFilter('all')">Все способы</button>
+                    <button class="history-filter-btn history-filter-btn-large" data-method="basket" onclick="setHistoryMethodFilter('basket')">Корзина</button>
+                    <button class="history-filter-btn history-filter-btn-large" data-method="single" onclick="setHistoryMethodFilter('single')">Поштучно</button>
+        
+                    <button class="history-filter-btn history-filter-btn-small" data-type="all" onclick="setHistoryTypeFilter('all')">Все типы</button>
+                    <button class="history-filter-btn history-filter-btn-large" data-type="sale" onclick="setHistoryTypeFilter('sale')">Продажи</button>
+                    <button class="history-filter-btn history-filter-btn-large" data-type="return" onclick="setHistoryTypeFilter('return')">Возвраты</button>
+                    
+                    <button class="history-filter-btn history-filter-reset" onclick="resetHistoryFilters()">🔄 Сбросить</button>
+                </div>
+                <div class="history-filter-row">
+                    <input type="datetime-local" id="historyDateTimeFrom" class="history-date-input" step="60">
+                    <span class="history-price-separator">—</span>
+                    <input type="datetime-local" id="historyDateTimeTo" class="history-date-input" step="60">
+                    <div class="history-price-filter">
+                        <span>💰</span>
+                        <input type="number" id="historyMinPrice" placeholder="0" value="0" step="100">
+                        <span class="history-price-separator">—</span>
+                        <input type="number" id="historyMaxPrice" placeholder="∞" step="100">
                     </div>
                 </div>
             </div>
@@ -1048,6 +1089,7 @@
 
         function addToHistory(items, total, method, isReturn = false) {
             const entry = {
+                id: Date.now() + Math.random(),
                 date: new Date().toISOString(),
                 items: items.map(item => ({ name: item.name, qty: item.qty, price: item.price })),
                 total: total,
@@ -1086,6 +1128,47 @@
                 }
             });
             renderHistoryList();
+        }
+
+        function resetHistoryFilters() {
+            historyMethodFilter = "all";
+            historyTypeFilter = "all";
+            document.querySelectorAll('[data-method], [data-type]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector('[data-method="all"]')?.classList.add('active');
+            document.querySelector('[data-type="all"]')?.classList.add('active');
+            
+            const dateFrom = document.getElementById('historyDateTimeFrom');
+            const dateTo = document.getElementById('historyDateTimeTo');
+            const minPrice = document.getElementById('historyMinPrice');
+            const maxPrice = document.getElementById('historyMaxPrice');
+            if (dateFrom) dateFrom.value = '';
+            if (dateTo) dateTo.value = '';
+            if (minPrice) minPrice.value = '0';
+            if (maxPrice) maxPrice.value = '';
+            
+            renderHistoryList();
+        }
+
+        function deleteHistoryEntry(id) {
+            salesHistory = salesHistory.filter(entry => entry.id !== id);
+            saveHistory();
+            renderHistoryList();
+            showToast("Запись удалена", true);
+        }
+
+        function clearAllHistory() {
+            if (salesHistory.length === 0) {
+                showToast("История уже пуста", false);
+                return;
+            }
+            if (confirm("Удалить всю историю операций? Это действие нельзя отменить.")) {
+                salesHistory = [];
+                saveHistory();
+                renderHistoryList();
+                showToast("Вся история очищена", true);
+            }
         }
 
         function renderHistoryList() {
@@ -1144,9 +1227,12 @@
         
                 html += `
                     <div class="history-item">
-                        <div class="history-date">${dateStr} <span class="history-badge">${methodLabel}</span> <span class="history-badge" style="background:${isReturn ? 'var(--minus-bg)' : 'var(--badge-bg)'}">${actionLabel}</span></div>
-                        <div class="history-details">${itemsHtml}</div>
-                        <div class="${isReturn ? 'history-return' : 'history-sale'}">${isReturn ? '↩️' : '💰'} Итого: ${entry.total} ₽</div>
+                        <div class="history-content">
+                            <div class="history-date">${dateStr} <span class="history-badge">${methodLabel}</span> <span class="history-badge" style="background:${isReturn ? 'var(--minus-bg)' : 'var(--badge-bg)'}">${actionLabel}</span></div>
+                            <div class="history-details">${itemsHtml}</div>
+                            <div class="${isReturn ? 'history-return' : 'history-sale'}">${isReturn ? '↩️' : '💰'} Итого: ${entry.total} ₽</div>
+                        </div>
+                        <button class="history-delete-btn" onclick="deleteHistoryEntry(${entry.id})" title="Удалить запись">🗑</button>
                     </div>
                 `;
             }
