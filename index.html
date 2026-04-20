@@ -643,9 +643,8 @@
         /* Нижняя строка: фильтр суммы */
         .history-filter-bottom {
             display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            align-items: center;
+            flex-direction: column;
+            gap: 8px;
             margin-top: 4px;
         }
         .history-filter-left {
@@ -660,7 +659,7 @@
         .history-filter-reset-row {
             display: flex;
             justify-content: flex-end;
-            margin-top: 0px;
+            margin-top: 4px;
         }
         .history-filter-reset {
             background: var(--reset-bg);
@@ -685,11 +684,11 @@
         .custom-datetime {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 20px;
-            padding: 4px 8px;
+            padding: 4px 12px;
             height: 34px;
         }
         .custom-datetime .datetime-label {
@@ -706,14 +705,13 @@
             background: var(--badge-bg);
             border: none;
             border-radius: 14px;
-            padding: 6px 4px;
-            font-size: 12px;
+            padding: 4px 6px;
+            font-size: 11px;
             color: var(--text-primary);
             outline: none;
             cursor: pointer;
             text-align: center;
             font-family: monospace;
-            width: 40px;
         }
         .datetime-select option {
             background: var(--card-bg);
@@ -721,7 +719,7 @@
         }
         .datetime-sep {
             color: var(--text-muted);
-            font-size: 12px;
+            font-size: 11px;
         }
 
         /* Поля даты */
@@ -982,7 +980,16 @@
             .history-price-filter { padding: 2px 10px; gap: 5px; height: 32px; }
             .history-filter-reset { padding: 0 20px; height: 32px; font-size: 12px; }
             .custom-datetime { padding: 2px 8px; height: 32px; gap: 4px; }
-            .datetime-select { padding: 2px 3px; font-size: 10px; }
+            .datetime-select { padding: 2px 3px; font-size: 9px; }
+            .history-filter-left {
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%;
+            }
+            .history-price-filter {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -1121,13 +1128,15 @@
                 </div>
                 <div class="history-filter-bottom">
                     <div class="history-filter-left">
-                        <!-- Кастомные поля даты и времени -->
+                        <!-- Строка "с" -->
                         <div class="custom-datetime" id="datetimeFromContainer">
                             <span class="datetime-label">с</span>
                             <div class="datetime-group">
                                 <select id="dateFromDay" class="datetime-select"></select>
                                 <span class="datetime-sep">.</span>
                                 <select id="dateFromMonth" class="datetime-select"></select>
+                                <span class="datetime-sep">.</span>
+                                <select id="dateFromYear" class="datetime-select"></select>
                             </div>
                             <div class="datetime-group">
                                 <select id="timeFromHour" class="datetime-select"></select>
@@ -1135,13 +1144,17 @@
                                 <select id="timeFromMinute" class="datetime-select"></select>
                             </div>
                         </div>
-                        <span class="history-price-separator">—</span>
+                    </div>
+                    <div class="history-filter-left" style="margin-top: 8px;">
+                        <!-- Строка "по" -->
                         <div class="custom-datetime" id="datetimeToContainer">
                             <span class="datetime-label">по</span>
                             <div class="datetime-group">
                                 <select id="dateToDay" class="datetime-select"></select>
                                 <span class="datetime-sep">.</span>
                                 <select id="dateToMonth" class="datetime-select"></select>
+                                <span class="datetime-sep">.</span>
+                                <select id="dateToYear" class="datetime-select"></select>
                             </div>
                             <div class="datetime-group">
                                 <select id="timeToHour" class="datetime-select"></select>
@@ -1156,9 +1169,9 @@
                             <input type="number" id="historyMaxPrice" placeholder="∞" step="100">
                         </div>
                     </div>
-                </div>
-                <div class="history-filter-reset-row">
-                    <button class="history-filter-reset" onclick="resetHistoryFilters()">Сбросить</button>
+                    <div class="history-filter-reset-row">
+                        <button class="history-filter-reset" onclick="resetHistoryFilters()">Сбросить</button>
+                    </div>
                 </div>
             </div>
             <button class="history-clear-btn" onclick="clearAllHistory()">🗑 Очистить всю историю</button>
@@ -1259,6 +1272,15 @@
 
         // Инициализация кастомных полей даты и времени
         function initDateTimeSelects() {
+            const currentYear = new Date().getFullYear();
+            const years = [];
+            for (let i = currentYear - 2; i <= currentYear + 2; i++) {
+                years.push(i);
+            }
+            
+            const monthNames = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 
+                                'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
+            
             // Заполняем дни (1-31)
             const daySelects = ['dateFromDay', 'dateToDay'];
             for (const selectId of daySelects) {
@@ -1274,16 +1296,31 @@
                 }
             }
             
-            // Заполняем месяцы (1-12)
+            // Заполняем месяцы (1-12) с названиями
             const monthSelects = ['dateFromMonth', 'dateToMonth'];
             for (const selectId of monthSelects) {
                 const select = document.getElementById(selectId);
                 if (select) {
                     select.innerHTML = '';
-                    for (let i = 1; i <= 12; i++) {
+                    for (let i = 0; i < 12; i++) {
                         const option = document.createElement('option');
-                        option.value = i;
-                        option.textContent = i.toString().padStart(2, '0');
+                        option.value = i + 1;
+                        option.textContent = monthNames[i];
+                        select.appendChild(option);
+                    }
+                }
+            }
+            
+            // Заполняем года
+            const yearSelects = ['dateFromYear', 'dateToYear'];
+            for (const selectId of yearSelects) {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    select.innerHTML = '';
+                    for (const year of years) {
+                        const option = document.createElement('option');
+                        option.value = year;
+                        option.textContent = year;
                         select.appendChild(option);
                     }
                 }
@@ -1324,12 +1361,12 @@
         function getDateTimeFromSelects(prefix) {
             const day = document.getElementById(`${prefix}Day`)?.value;
             const month = document.getElementById(`${prefix}Month`)?.value;
+            const year = document.getElementById(`${prefix}Year`)?.value;
             const hour = document.getElementById(`time${prefix === 'dateFrom' ? 'From' : 'To'}Hour`)?.value;
             const minute = document.getElementById(`time${prefix === 'dateFrom' ? 'From' : 'To'}Minute`)?.value;
-            const currentYear = new Date().getFullYear();
             
-            if (day && month && hour && minute) {
-                return new Date(currentYear, month - 1, day, hour, minute);
+            if (day && month && year && hour && minute) {
+                return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute));
             }
             return null;
         }
@@ -1343,28 +1380,32 @@
             document.querySelector('[data-method="all"]')?.classList.add('active');
             document.querySelector('[data-type="all"]')?.classList.add('active');
             
-            // Сбрасываем даты в селектах на текущие значения по умолчанию
             const now = new Date();
+            const currentYear = now.getFullYear();
             const currentMonth = now.getMonth() + 1;
             const currentDay = now.getDate();
             
             // Сброс селектов "с"
             const fromDay = document.getElementById('dateFromDay');
             const fromMonth = document.getElementById('dateFromMonth');
+            const fromYear = document.getElementById('dateFromYear');
             const fromHour = document.getElementById('timeFromHour');
             const fromMinute = document.getElementById('timeFromMinute');
             if (fromDay) fromDay.value = currentDay;
             if (fromMonth) fromMonth.value = currentMonth;
+            if (fromYear) fromYear.value = currentYear;
             if (fromHour) fromHour.value = 0;
             if (fromMinute) fromMinute.value = 0;
             
             // Сброс селектов "по"
             const toDay = document.getElementById('dateToDay');
             const toMonth = document.getElementById('dateToMonth');
+            const toYear = document.getElementById('dateToYear');
             const toHour = document.getElementById('timeToHour');
             const toMinute = document.getElementById('timeToMinute');
             if (toDay) toDay.value = currentDay;
             if (toMonth) toMonth.value = currentMonth;
+            if (toYear) toYear.value = currentYear;
             if (toHour) toHour.value = 23;
             if (toMinute) toMinute.value = 59;
             
@@ -1437,7 +1478,7 @@
             let html = '';
             for (const entry of filtered) {
                 const date = new Date(entry.date);
-                const dateStr = date.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                const dateStr = date.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
                 const isBasket = entry.method === 'basket';
                 const isReturn = entry.isReturn;
         
@@ -2460,7 +2501,8 @@
         
         // Добавляем слушатели для обновления истории при изменении дат
         function bindDateTimeEvents() {
-            const selectIds = ['dateFromDay', 'dateFromMonth', 'dateFromYear', 'timeFromHour', 'timeFromMinute', 'dateToDay', 'dateToMonth', 'dateToYear', 'timeToHour', 'timeToMinute'];
+            const selectIds = ['dateFromDay', 'dateFromMonth', 'dateFromYear', 'timeFromHour', 'timeFromMinute', 
+                               'dateToDay', 'dateToMonth', 'dateToYear', 'timeToHour', 'timeToMinute'];
             for (const id of selectIds) {
                 const el = document.getElementById(id);
                 if (el) el.addEventListener('change', () => renderHistoryList());
