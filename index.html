@@ -36,8 +36,9 @@
         }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); margin: 0; padding: 12px; padding-bottom: 70px; transition: background 0.3s ease; }
         .header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-        .title-area { flex: 1; }
+        .title-area { flex: 1; display: flex; align-items: baseline; gap: 6px; }
         h1 { font-size: 22px; margin: 0; color: var(--badge-text); }
+        .beta-badge { font-size: 10px; color: var(--text-secondary); opacity: 0.7; font-weight: normal; }
         .sub { color: var(--text-secondary); margin-bottom: 16px; font-size: 13px; }
         .theme-toggle { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 30px; width: 40px; height: 40px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px var(--shadow); flex-shrink: 0; }
         .theme-toggle:active { transform: scale(0.95); }
@@ -221,6 +222,14 @@
             border-top: 2px solid var(--border-color);
             padding-top: 16px;
         }
+        .extra-costs-section .stats-section-title {
+            color: white !important;
+            background: var(--btn-bg);
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
         .extra-cost-item {
             display: flex;
             justify-content: space-between;
@@ -231,12 +240,14 @@
         .extra-cost-name {
             flex: 2;
             font-size: 13px;
+            color: white !important;
         }
         .extra-cost-amount {
             flex: 1;
             text-align: right;
             font-weight: bold;
-            color: var(--price-color);
+            color: white !important;
+            padding-right: 8px;
         }
         .extra-cost-delete {
             background: none;
@@ -283,39 +294,66 @@
             width: auto;
             height: auto;
         }
-        .total-expenses-block {
+        .stats-summary-compact {
             background: var(--btn-bg);
             border-radius: 16px;
-            padding: 16px;
-            margin-top: 20px;
-            text-align: center;
-        }
-        .total-expenses-value {
-            font-size: 28px;
-            font-weight: bold;
-            color: white;
-        }
-        .total-expenses-label {
-            font-size: 11px;
-            color: rgba(255,255,255,0.8);
-            margin-top: 4px;
-        }
-        .stats-summary {
-            background: var(--btn-bg);
-            border-radius: 16px;
-            padding: 16px;
-            margin-top: 20px;
+            padding: 8px 16px;
+            margin: 16px 0 20px 0;
             text-align: center;
         }
         .stats-summary-value {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
             color: white;
         }
         .stats-summary-label {
             font-size: 11px;
             color: rgba(255,255,255,0.8);
-            margin-top: 4px;
+            margin-top: 2px;
+        }
+        .detail-section {
+            margin-top: 24px;
+            margin-bottom: 20px;
+        }
+        .detail-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--badge-text);
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .detail-table th,
+        .detail-table td {
+            padding: 8px 6px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .detail-table th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: var(--badge-bg);
+        }
+        .detail-table .text-right {
+            text-align: right;
+        }
+        .popular-badge {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            background: var(--btn-bg);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 22px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 8px;
         }
         
         @media (min-width: 1024px) { .title-row { margin-bottom: 2px; } .name { font-size: 24px; } .stock { font-size: 22px; } .card { padding: 12px; } }
@@ -345,6 +383,7 @@
             .history-price-filter { width: 100%; justify-content: center; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .stats-card-value { font-size: 18px; }
+            .detail-table th, .detail-table td { font-size: 10px; padding: 6px 3px; }
         }
     </style>
 </head>
@@ -365,7 +404,10 @@
 
     <div id="mainContent" style="display:none;">
         <div class="header-row">
-            <div class="title-area"><h1>Учёт бананчиков 🍌</h1></div>
+            <div class="title-area">
+                <h1>Учёт бананчиков 🍌</h1>
+                <span class="beta-badge">beta</span>
+            </div>
             <button class="theme-toggle" id="themeToggle">🌙</button>
         </div>
         <div class="sub">Всё на благо ясгу фд! Всё на благо ясгу фд!</div>
@@ -500,7 +542,7 @@
     
     <!-- Модалка статистики -->
     <div id="statsModal" class="modal">
-        <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-content" style="max-width: 800px;">
             <button class="modal-close-btn" onclick="closeStatsModal()">×</button>
             <div class="modal-header">
                 <span>📊 Статистика продаж</span>
@@ -512,7 +554,6 @@
     </div>
 
     <script>
-        // ⚠️ ВСТАВЬТЕ ВАШ АКТУАЛЬНЫЙ URL СЮДА ⚠️
         const API_URL = "https://script.google.com/macros/s/AKfycbzTy-EPlVQ5HYDbqCMdZ0fj10j5SzQ0EDJWmIjBhaBO_rKFaUZJIj4TQe9DZEcTd67aug/exec";
         const CORRECT_PASSWORD = "банан";
         
@@ -1298,6 +1339,67 @@
             // Рентабельность
             const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue * 100) : 0;
             
+            // Собираем данные для детализации по товарам и типам
+            const productStats = {};
+            const typeStats = {};
+            
+            for (const sale of sales) {
+                for (const item of sale.items) {
+                    const card = originalCardsData.find(c => c.name === item.name);
+                    const type = card?.type || "Другое";
+                    const revenue = item.qty * item.price;
+                    const cost = (card?.cost || 0) * item.qty;
+                    
+                    if (!productStats[item.name]) {
+                        productStats[item.name] = { type, qty: 0, revenue: 0, cost: 0 };
+                    }
+                    productStats[item.name].qty += item.qty;
+                    productStats[item.name].revenue += revenue;
+                    productStats[item.name].cost += cost;
+                    
+                    if (!typeStats[type]) {
+                        typeStats[type] = { qty: 0, revenue: 0, cost: 0 };
+                    }
+                    typeStats[type].qty += item.qty;
+                    typeStats[type].revenue += revenue;
+                    typeStats[type].cost += cost;
+                }
+            }
+            
+            // Топ-5 по количеству продаж
+            const topByQty = Object.entries(productStats)
+                .sort((a, b) => b[1].qty - a[1].qty)
+                .slice(0, 5);
+            
+            const topTypesByQty = Object.entries(typeStats)
+                .sort((a, b) => b[1].qty - a[1].qty)
+                .slice(0, 5);
+            
+            // Детализация по товарам
+            const productDetails = Object.entries(productStats)
+                .map(([name, data]) => ({
+                    name,
+                    type: data.type,
+                    qty: data.qty,
+                    revenue: data.revenue,
+                    cost: data.cost,
+                    profit: data.revenue - data.cost,
+                    margin: data.revenue > 0 ? ((data.revenue - data.cost) / data.revenue * 100) : 0
+                }))
+                .sort((a, b) => b.margin - a.margin);
+            
+            // Детализация по типам
+            const typeDetails = Object.entries(typeStats)
+                .map(([type, data]) => ({
+                    type,
+                    qty: data.qty,
+                    revenue: data.revenue,
+                    cost: data.cost,
+                    profit: data.revenue - data.cost,
+                    margin: data.revenue > 0 ? ((data.revenue - data.cost) / data.revenue * 100) : 0
+                }))
+                .sort((a, b) => b.margin - a.margin);
+            
             const formatCurrency = (value) => value.toLocaleString('ru-RU') + ' ₽';
             const formatPercent = (value) => value.toFixed(1) + '%';
             
@@ -1323,14 +1425,99 @@
                         <div class="stats-card-value ${netProfit >= 0 ? 'profit-positive' : 'profit-negative'}">${formatCurrency(netProfit)}</div>
                         <div class="stats-card-label">📈 Чистая прибыль</div>
                     </div>
-                    <div class="stats-card">
-                        <div class="stats-card-value ${profitMargin >= 0 ? 'profit-positive' : 'profit-negative'}">${formatPercent(profitMargin)}</div>
-                        <div class="stats-card-label">📊 Рентабельность</div>
-                    </div>
+                </div>
+                
+                <div class="stats-summary-compact">
+                    <div class="stats-summary-value ${profitMargin >= 0 ? 'profit-positive' : 'profit-negative'}">${formatPercent(profitMargin)}</div>
+                    <div class="stats-summary-label">Рентабельность продаж</div>
+                </div>
+                
+                <!-- Детализация по товарам -->
+                <div class="detail-section">
+                    <div class="detail-title">📦 Детализация по товарам</div>
+                    <table class="detail-table">
+                        <thead>
+                            <tr><th>Товар</th><th>Тип</th><th class="text-right">Кол-во</th><th class="text-right">Выручка</th><th class="text-right">Себест.</th><th class="text-right">Прибыль</th><th class="text-right">Рентаб.</th></tr>
+                        </thead>
+                        <tbody>
+                            ${productDetails.map(p => `
+                                <tr>
+                                    <td>${escapeHtml(p.name)}</td>
+                                    <td><span class="type-badge" style="background:${getTypeColor(p.type)}20; color:${getTypeColor(p.type)};">${escapeHtml(p.type)}</span></td>
+                                    <td class="text-right">${p.qty} шт</td>
+                                    <td class="text-right">${formatCurrency(p.revenue)}</td>
+                                    <td class="text-right">${formatCurrency(p.cost)}</td>
+                                    <td class="text-right ${p.profit >= 0 ? 'profit-positive' : 'profit-negative'}">${formatCurrency(p.profit)}</td>
+                                    <td class="text-right ${p.margin >= 0 ? 'profit-positive' : 'profit-negative'}">${formatPercent(p.margin)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Детализация по типам -->
+                <div class="detail-section">
+                    <div class="detail-title">🏷️ Детализация по типам мерча</div>
+                    <table class="detail-table">
+                        <thead>
+                            <tr><th>Тип</th><th class="text-right">Кол-во</th><th class="text-right">Выручка</th><th class="text-right">Себест.</th><th class="text-right">Прибыль</th><th class="text-right">Рентаб.</th></tr>
+                        </thead>
+                        <tbody>
+                            ${typeDetails.map(t => `
+                                <tr>
+                                    <td><span class="type-badge" style="background:${getTypeColor(t.type)}20; color:${getTypeColor(t.type)};">${escapeHtml(t.type)}</span></td>
+                                    <td class="text-right">${t.qty} шт</td>
+                                    <td class="text-right">${formatCurrency(t.revenue)}</td>
+                                    <td class="text-right">${formatCurrency(t.cost)}</td>
+                                    <td class="text-right ${t.profit >= 0 ? 'profit-positive' : 'profit-negative'}">${formatCurrency(t.profit)}</td>
+                                    <td class="text-right ${t.margin >= 0 ? 'profit-positive' : 'profit-negative'}">${formatPercent(t.margin)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Топ популярных товаров -->
+                <div class="detail-section">
+                    <div class="detail-title">🏆 Самые популярные товары</div>
+                    <table class="detail-table">
+                        <thead>
+                            <tr><th>#</th><th>Товар</th><th>Тип</th><th class="text-right">Продано, шт</th></tr>
+                        </thead>
+                        <tbody>
+                            ${topByQty.map(([name, data], idx) => `
+                                <tr>
+                                    <td class="text-right"><span class="popular-badge">${idx+1}</span></td>
+                                    <td>${escapeHtml(name)}</td>
+                                    <td><span class="type-badge" style="background:${getTypeColor(data.type)}20; color:${getTypeColor(data.type)};">${escapeHtml(data.type)}</span></td>
+                                    <td class="text-right">${data.qty} шт</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Топ популярных типов -->
+                <div class="detail-section">
+                    <div class="detail-title">🏆 Самые популярные типы мерча</div>
+                    <table class="detail-table">
+                        <thead>
+                            <tr><th>#</th><th>Тип</th><th class="text-right">Продано, шт</th></tr>
+                        </thead>
+                        <tbody>
+                            ${topTypesByQty.map(([type, data], idx) => `
+                                <tr>
+                                    <td class="text-right"><span class="popular-badge">${idx+1}</span></td>
+                                    <td><span class="type-badge" style="background:${getTypeColor(type)}20; color:${getTypeColor(type)};">${escapeHtml(type)}</span></td>
+                                    <td class="text-right">${data.qty} шт</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
                 </div>
                 
                 <div class="extra-costs-section">
-                    <div class="stats-section-title">➕ Дополнительные расходы</div>
+                    <div class="detail-title">➕ Дополнительные расходы</div>
                     <div id="extra-costs-list">
                         ${extraCosts.length === 0 ? '<div style="color: var(--text-muted); text-align: center; padding: 12px;">Нет дополнительных расходов</div>' : ''}
                         ${extraCosts.map((cost, idx) => `
