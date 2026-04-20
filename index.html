@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>🍌 Бананчики 🍌</title>
+    <title>🍌 Бананчики — учёт мерча</title>
     <style>
         * {
             box-sizing: border-box;
@@ -1063,7 +1063,6 @@
             <button class="refresh-btn" onclick="loadData(true, true)">🔄 Обновить</button>
             <button class="refresh-btn" id="rulesButton" style="background: var(--btn-bg);">📋 Правила</button>
             <button class="history-btn" onclick="showHistory()">📜 История</button>
-            <button class="refresh-btn" onclick="manualSyncHistory()" style="background: var(--btn-bg);">🔄 Синхр. историю</button>
         </div>
         
         <div id="progressContainer" class="progress-container">
@@ -1220,13 +1219,14 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbw0e1ztZ6FAKR9yhActsz14sObH583BV4elyGOgGaxYNlcMfC8rI9m6OKW39-rCsFFWXw/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbw-QMM6PtyGZiUMcbWi8nJnfNTyGtDMVbNQ1ftKXLEi2jrc_IB0Y-TziVm4M7DaQ7-exw/exec";
         const CORRECT_PASSWORD = "банан";
         
         let originalCardsData = [];
         let currentFilteredData = [];
         let isLoading = false;
         let autoRefreshInterval = null;
+        let historySyncInterval = null;
         
         let selectedTypes = new Set();
         let currentSortBy = "none";
@@ -1247,7 +1247,7 @@
             return typeColors.get(type);
         }
         
-        // ========== ИСТОРИЯ С СИНХРОНИЗАЦИЕЙ ==========
+        // ========== ИСТОРИЯ С АВТОСИНХРОНИЗАЦИЕЙ ==========
         let salesHistory = [];
         let historyMethodFilter = "all";
         let historyTypeFilter = "all";
@@ -1273,7 +1273,9 @@
                 if (data && data.history) {
                     salesHistory = data.history;
                     saveHistoryToLocal();
-                    renderHistoryList();
+                    if (document.getElementById('historyModal')?.style.display === 'block') {
+                        renderHistoryList();
+                    }
                     return true;
                 }
                 return false;
@@ -1316,7 +1318,9 @@
             salesHistory.unshift(entry);
             if (salesHistory.length > 200) salesHistory = salesHistory.slice(0, 200);
             saveHistory();
-            renderHistoryList();
+            if (document.getElementById('historyModal')?.style.display === 'block') {
+                renderHistoryList();
+            }
         }
 
         function addSingleSaleToHistory(name, qty, price, isReturn = false) {
@@ -1348,11 +1352,12 @@
             renderHistoryList();
         }
 
-        async function manualSyncHistory() {
-            showToast("Синхронизация истории...", true);
-            await loadHistoryFromServer();
-            renderHistoryList();
-            showToast("История синхронизирована!", true);
+        // Автоматическая синхронизация истории с сервером (каждую минуту)
+        function startHistoryAutoSync() {
+            if (historySyncInterval) clearInterval(historySyncInterval);
+            historySyncInterval = setInterval(async () => {
+                await loadHistoryFromServer();
+            }, 60000);
         }
 
         function initDateTimeSelects() {
@@ -2569,7 +2574,10 @@
             if (maxPrice) maxPrice.addEventListener('input', () => renderHistoryList());
         }
         
-        function startAutoRefresh() { if (autoRefreshInterval) clearInterval(autoRefreshInterval); autoRefreshInterval = setInterval(() => { loadData(false, true); }, 60000); }
+        function startAutoRefresh() { 
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval); 
+            autoRefreshInterval = setInterval(() => { loadData(false, true); }, 60000);
+        }
         
         function resetAllFilters() {
             const searchInput = document.getElementById('searchInput');
@@ -2599,6 +2607,7 @@
                 bindDateTimeEvents();
                 loadData(true, true);
                 startAutoRefresh();
+                startHistoryAutoSync();
             } else { errorMsg.style.display = 'block'; passwordInput.value = ''; passwordInput.focus(); }
         }
         
@@ -2615,6 +2624,7 @@
                 bindDateTimeEvents();
                 loadData(true, true);
                 startAutoRefresh();
+                startHistoryAutoSync();
             } else { loginOverlay.style.display = 'flex'; mainContent.style.display = 'none'; document.getElementById('passwordInput').focus(); }
         }
         
