@@ -1357,7 +1357,7 @@
             if (historySyncInterval) clearInterval(historySyncInterval);
             historySyncInterval = setInterval(async () => {
                 await loadHistoryFromServer();
-            }, 60000);
+            }, 10000);
         }
 
         function initDateTimeSelects() {
