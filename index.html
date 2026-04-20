@@ -2477,6 +2477,7 @@
         function showHistory() {
             const modal = document.getElementById('historyModal');
             if (modal) {
+                resetHistoryFilters(); // Добавьте эту строку
                 renderHistoryList();
                 modal.style.display = 'block';
             }
